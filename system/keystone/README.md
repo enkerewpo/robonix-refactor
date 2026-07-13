@@ -1,22 +1,26 @@
-# Keystone — identity, configuration, policy
+# Keystone - user identity and access
 
-One of the 12 Robonix system components. Stores the body's identity,
-its persistent configuration, and the policy decisions that depend on
-who is operating it.
+Keystone is the Robonix system component that owns user identity, user
+preferences, voiceprint bindings, and access decisions used by Liaison and
+Pilot.
 
-**Status — v0.1 stub.** Not yet implemented.
+## Current implementation
 
-Today: deployment manifests in YAML, per-package `package_manifest.yaml`,
-and ad-hoc `.env` files. User identity / per-user permissions are not
-modelled centrally. The currently implemented user gate lives in Liaison:
-text/API tasks use `context_json.user_id`, while voice sessions must pass
-voiceprint before Pilot/TTS/action when access control is enabled.
+The `robonix-keystone` crate provides the first in-memory core:
 
-When Keystone lands it will:
+- create, list, and delete users;
+- store JSON preferences per user;
+- bind a voiceprint ID to one user;
+- store per-user text and voice access settings;
+- authorize text input under the global security configuration.
 
-- own the canonical key/value config store (read by all components on
-  boot, hot-reloadable for some keys),
-- track identities (operators, deployments, fleets) and the policies
-  that bind them to capability allow-lists,
-- be the source-of-truth that Liaison and future Sentinel policy checks
-  consult for "is this user allowed to call this skill right now".
+The core is intentionally independent of transport. Atlas registration, gRPC
+contracts, persistent storage, and calls to the voiceprint service are the next
+integration steps. Until those are connected, this crate is not a replacement
+for Liaison's existing runtime access gate.
+
+Run the focused tests from the repository root:
+
+```bash
+cargo test -p robonix-keystone
+```
